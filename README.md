@@ -1,6 +1,6 @@
 # NOAA
 
-[![Build Status](https://travis-ci.org/kfull/fars.svg?branch=master)](https://travis-ci.org/kfull/fars)
+[![Travis-CI Build Status](https://travis-ci.org/kfull/noaa.svg?branch=master)](https://travis-ci.org/kfull/noaa)
 
 This is an R package designed to visualize earthquake data from the National Oceanic and Atmospheric Administration (NOAA).
 
