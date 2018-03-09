@@ -1,0 +1,115 @@
+---
+title: "Overview on NOAA Package"
+author: "Katharina Full"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+options(warn=-1)
+
+library(noaa)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(chron)
+library(ggplot2)
+library(grid)
+library(scales)
+library(utils)
+library(leaflet)
+
+setwd(system.file("extdata", package = "noaa"))
+```
+
+This vignette gives an overview on the functionality of the NOAA package. The package is designed to visualize earthquake data from the National Oceanic and Atmospheric Administration (NOAA).
+
+The package provides a set of functions for visualizing earthquake data from NOAA:
+
+- `eq_clean_data(data)`
+- `eq_location_clean(data)`
+- `geom_timeline(mapping, data, stat, position, ..., na.rm, show.legend, inherit.aes)`
+- `geom_timeline_label(mapping, data, stat, position, ..., na.rm, show.legend, inherit.aes)`
+- `eq_map(data, annot_col)`
+- `eq_create_label(data, location, magnitude, total_deaths)`
+
+In the following, these functions are discussed in more detail. The data used for demonstrating the usage of the functions are stored in the package folder `inst/extdata`.
+
+## Cleaning NOAA Earthquake Data
+
+Before visualizing earthquake data from NOAA, the data has to be cleaned. For that purpose, the function `eq_clean_data(data)` can be used. The function adds a date column to the given NOAA data frame, converts the latitude and longitude columns to numeric, and uses the function `eq_location_clean(data)` to strip out the country name of the location column and covert the location column to title case. 
+
+The following example shows how to clean earthquake data:
+
+```{r noaa_cleaning_1, message=FALSE}
+# set working directory
+setwd(system.file("extdata", package = "noaa"))
+# read and clean NOAA data
+data <- read_delim("signif.txt", "\t") %>%
+  eq_clean_data()
+```
+
+The following examples can be used in order to only clean the location name instead of the whole earthquake data:
+
+```{r noaa_cleaning_2, message=FALSE}
+# set working directory
+setwd(system.file("extdata", package = "noaa"))
+# read and clean NOAA data
+data <- read_delim("signif.txt", "\t") %>%
+  eq_location_clean()
+```
+
+## Plotting NOAA Earthquake Data
+
+For the purpose of plotting earthquake data from NOAA, two function are available in the package. The function `geom_timeline(mapping, data, stat, position, ..., na.rm, show.legend, inherit.aes)` plots one or multiple timelines of earthquakes. The function  `geom_timeline_label(mapping, data, stat, position, ..., na.rm, show.legend, inherit.aes)` adds labels to the timelines. 
+
+With the following example, timelines of earthquakes are plotted and labelled:
+
+```{r noaa_plotting, fig.width = 7, message=FALSE}
+# set working directory
+setwd(system.file("extdata", package = "noaa"))
+# read and clean NOAA data
+data <- read_delim("signif.txt", "\t") %>%
+  eq_clean_data() %>%
+  dplyr::filter(COUNTRY %in% c("USA", "CHINA"), YEAR > 2000)
+# plot NOAA data
+ggplot2::ggplot(data, ggplot2::aes(DATE,
+                                   colour = as.numeric(TOTAL_DEATHS),
+                                   y = COUNTRY,
+                                   size = as.numeric(EQ_PRIMARY))) +
+ geom_timeline() +
+ geom_timeline_label(ggplot2::aes(label = data$LOCATION_NAME)) +
+ ggplot2::guides(size = ggplot2::guide_legend(title = "Richter Scale")) +
+ ggplot2::scale_colour_continuous(name = "Number of Deaths") +
+ ggplot2::theme_classic()
+```
+
+## Mapping NOAA Earthquake Data
+
+In addition to cleaning and plotting earthquake data from NOAA, the package provides functions for mapping earthquake data. The function `eq_map(data, annot_col)` maps the epicenters of earthquakes and annotates them within pop up windows. The function `eq_create_label(data, location, magnitude, total_deaths)` creates HTML labels for earthquakes that can be used as annotations within the pop up windows.
+
+With the following example, earthquake data are mapped and annotated:
+
+```{r noaa_mapping, out.width = '100%', message=FALSE}
+# set working directory
+setwd(system.file("extdata", package = "noaa"))
+# read and clean NOAA data
+data <- readr::read_delim("signif.txt", "\t") %>%
+  eq_clean_data() %>%
+  dplyr::filter(COUNTRY == "MEXICO", YEAR > 2000)
+# create HTML labels
+data <- data %>%
+  dplyr::mutate(html_label = eq_create_label(.))
+# map and annotate NOAA data
+eq_map(data, annot_col = "html_label")
+```

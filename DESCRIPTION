@@ -1,0 +1,25 @@
+Package: noaa
+Type: Package
+Title: Visualize NOAA Earthquake Data
+Version: 0.1.0
+Author: Katharina Full <katharina.full@adidas.com>
+Maintainer: Katharina Full <katharina.full@adidas.com>
+Description: The package provides functions to visualize earthquake data from the National Oceanic and Atmospheric Administration (NOAA).
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Imports: dplyr,
+         tidyr,
+         stringr,
+         chron,
+         ggplot2,
+         grid,
+         scales,
+         utils,
+         leaflet,
+         readr
+Suggests: knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
